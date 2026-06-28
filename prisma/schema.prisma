@@ -1,0 +1,250 @@
+// MedServicePrice.kz — Medical service price aggregator for Kazakhstan
+// Architecture: separate Raw Layer (raw_parsed_data) and Normalized Layer (normalized_prices)
+// Tables and columns use snake_case via @map/@@map for clean raw SQL interop.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Clinics — entities offering medical services across Kazakhstan cities.
+model Clinic {
+  id            String   @id @default(cuid())
+  clinicName    String   @map("clinic_name")
+  city          String
+  address       String
+  phone         String
+  workingHours  String   @map("working_hours")
+  sourceUrl     String   @map("source_url")
+  website       String?
+  latitude      Float?
+  longitude     Float?
+  rating        Float    @default(0)
+  onlineBooking Boolean  @default(false) @map("online_booking")
+  description   String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  normalizedPrices NormalizedPrice[]
+  rawParsedData    RawParsedData[]
+  reviews          ClinicReview[]
+  vouchers         PriceVoucher[]
+
+  @@index([city])
+  @@index([clinicName, city])
+  @@index([rating])
+  @@map("clinics")
+}
+
+/// Reference table of normalized services (50+ common medical items).
+model ServiceDirectory {
+  id          String   @id @default(cuid())
+  nameRu      String   @map("name_ru")
+  nameKk      String   @map("name_kk")
+  nameEn      String   @map("name_en")
+  synonyms    String // JSON-encoded array of synonyms (e.g. ["ОАК","CBC","Клинический анализ крови"])
+  category    String // laboratory | doctor_appointment | diagnostics | procedure
+  description String?
+  unit        String?
+  // OSMS (Обязательное социальное медицинское страхование) coverage hint.
+  // "likely" = service typically covered by state insurance for insured patients.
+  // "unlikely" = service typically not covered (cosmetic, elective, premium).
+  // "unknown" / null = no data; UI must show "informational only" disclaimer.
+  osmsCoverage String? @map("osms_coverage")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  normalizedPrices NormalizedPrice[]
+  priceHistory     PriceHistory[]
+  rawParsedData    RawParsedData[]
+  unmatchedSuggestions UnmatchedQueue[]
+  subscriptions    PriceSubscription[]
+  vouchers         PriceVoucher[]
+
+  @@index([category])
+  @@index([nameRu])
+  @@map("service_directory")
+}
+
+/// Raw ingestion layer — retains items for 90+ days for auditing/troubleshooting.
+model RawParsedData {
+  id             String   @id @default(cuid())
+  clinicId       String?  @map("clinic_id")
+  clinic         Clinic?  @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  clinicNameRaw  String   @map("clinic_name_raw")
+  cityNameRaw    String   @map("city_name_raw")
+  serviceNameRaw String   @map("service_name_raw")
+  priceRaw       Float    @map("price_raw")
+  currencyRaw    String   @map("currency_raw") // KZT | USD
+  durationDays   Int?     @map("duration_days")
+  sourceUrl      String   @map("source_url")
+  sourceName     String   @map("source_name") // KDL | Invitro | Olymp | Helix | etc.
+  parsedAt       DateTime @default(now()) @map("parsed_at")
+  serviceId      String?  @map("service_id")
+  service        ServiceDirectory? @relation(fields: [serviceId], references: [id])
+  normalized     Boolean  @default(false)
+  confidence     Float    @default(0)
+  rawData        String?  @map("raw_data") // full JSON snapshot of parsed payload for auditing
+
+  @@index([clinicNameRaw, cityNameRaw, serviceNameRaw])
+  @@index([sourceName])
+  @@index([parsedAt])
+  @@index([normalized])
+  @@map("raw_parsed_data")
+}
+
+/// Live normalized data layer mapped to services_directory, used by the search engine.
+model NormalizedPrice {
+  id             String   @id @default(cuid())
+  clinicId       String   @map("clinic_id")
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  serviceId      String   @map("service_id")
+  service        ServiceDirectory @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceNameRaw String   @map("service_name_raw")
+  priceKzt       Float    @map("price_kzt")
+  currency       String   @default("KZT")
+  durationDays   Int?     @map("duration_days")
+  parsedAt       DateTime @default(now()) @map("parsed_at")
+  isActive       Boolean  @default(true) @map("is_active")
+  rawId          String?  @map("raw_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([clinicId, serviceId])
+  @@index([serviceId, priceKzt])
+  @@index([clinicId])
+  @@index([isActive])
+  @@index([parsedAt])
+  @@map("normalized_prices")
+}
+
+/// Routing queue for parsed services that fail algorithmic alignment (< 80% confidence).
+model UnmatchedQueue {
+  id                 String   @id @default(cuid())
+  serviceNameRaw     String   @map("service_name_raw")
+  clinicNameRaw      String   @map("clinic_name_raw")
+  cityNameRaw        String   @map("city_name_raw")
+  priceRaw           Float    @map("price_raw")
+  currencyRaw        String   @map("currency_raw")
+  sourceName         String   @map("source_name")
+  confidence         Float
+  parsedAt           DateTime @default(now()) @map("parsed_at")
+  status             String   @default("pending") // pending | resolved | ignored
+  suggestedServiceId String?  @map("suggested_service_id")
+  suggestedService   ServiceDirectory? @relation(fields: [suggestedServiceId], references: [id])
+  resolvedAt         DateTime? @map("resolved_at")
+  resolvedBy         String?  @map("resolved_by")
+  notes              String?
+
+  @@index([status])
+  @@index([sourceName])
+  @@map("unmatched_queue")
+}
+
+/// Auditable tracking of price shifts over time for charting.
+model PriceHistory {
+  id         String   @id @default(cuid())
+  serviceId  String   @map("service_id")
+  service    ServiceDirectory @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  clinicId   String   @map("clinic_id")
+  clinicName String   @map("clinic_name")
+  priceKzt   Float    @map("price_kzt")
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  @@index([serviceId, recordedAt])
+  @@index([clinicId])
+  @@map("price_history")
+}
+
+/// Price-drop subscriptions — users sign up to be notified when a service's
+/// price at a clinic drops below a threshold.
+model PriceSubscription {
+  id          String   @id @default(cuid())
+  email       String
+  serviceId   String   @map("service_id")
+  service     ServiceDirectory @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  clinicId    String?  @map("clinic_id") // null = any clinic
+  thresholdKzt Float   @map("threshold_kzt") // notify when price <= this
+  createdAt   DateTime @default(now()) @map("created_at")
+  lastNotifiedAt DateTime? @map("last_notified_at")
+  active      Boolean  @default(true)
+  token       String   @unique // for unsubscribe link
+
+  @@index([email])
+  @@index([serviceId])
+  @@index([active])
+  @@map("price_subscriptions")
+}
+
+/// Parser execution history — one row per scraper run per source.
+/// Powers the Admin "Source Health" dashboard: run history, success/failure
+/// rates, error log, coverage metrics, and data-freshness indicators.
+model ParserRun {
+  id            String   @id @default(cuid())
+  sourceName    String   @map("source_name") // KDL | Invitro | Olymp | Helix | OnClinic | etc.
+  sourceUrl     String   @map("source_url")
+  startedAt     DateTime @default(now()) @map("started_at")
+  finishedAt    DateTime? @map("finished_at")
+  status        String   @default("running") // running | success | partial | failed
+  rowsParsed    Int      @default(0) @map("rows_parsed")
+  rowsNormalized Int     @default(0) @map("rows_normalized")
+  rowsUnmatched Int      @default(0) @map("rows_unmatched")
+  rowsUpserted  Int      @default(0) @map("rows_upserted")
+  errorsCount   Int      @default(0) @map("errors_count")
+  errorMessage  String?  @map("error_message") // first error message (truncated)
+  errorDetails  String?  @map("error_details") // JSON array of {url, error, ts}
+  triggeredBy   String   @default("manual") @map("triggered_by") // manual | schedule
+  durationMs    Int?     @map("duration_ms")
+
+  @@index([sourceName, startedAt])
+  @@index([status])
+  @@map("parser_runs")
+}
+
+/// User-submitted clinic reviews/ratings.
+model ClinicReview {
+  id        String   @id @default(cuid())
+  clinicId  String   @map("clinic_id")
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  authorName String  @map("author_name")
+  rating    Float    // 1.0 - 5.0
+  comment   String
+  lang      String   @default("ru") // review language
+  createdAt DateTime @default(now()) @map("created_at")
+  approved  Boolean  @default(true) // auto-approve for MVP; admin can moderate
+
+  @@index([clinicId, createdAt])
+  @@index([approved])
+  @@map("clinic_reviews")
+}
+
+/// Price Lock Vouchers — a downloadable confirmation artifact that snapshots
+/// a clinic+service+listed price at a moment in time. Used by the "Lock Price"
+/// feature: the user clicks the button and gets a printable voucher with a
+/// unique confirmation ID, timestamp, and a disclaimer noting that the listed
+/// price is informational and may not be honored by the clinic.
+model PriceVoucher {
+  id             String   @id @default(cuid())
+  confirmationId String   @unique @map("confirmation_id") // short, shareable, e.g. MSP-AB12CD
+  clinicId       String   @map("clinic_id")
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  serviceId      String   @map("service_id")
+  service        ServiceDirectory @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  clinicName     String   @map("clinic_name")
+  serviceName    String   @map("service_name")
+  priceKzt       Float    @map("price_kzt")
+  city           String
+  sourceUrl      String   @map("source_url")
+  parsedAt       DateTime @map("parsed_at") // when the underlying price was scraped
+  createdAt      DateTime @default(now()) @map("created_at")
+  isStale        Boolean  @default(false) @map("is_stale") // true if parsedAt > 30 days
+
+  @@index([clinicId])
+  @@index([serviceId])
+  @@index([confirmationId])
+  @@map("price_vouchers")
+}
