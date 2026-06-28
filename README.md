@@ -22,7 +22,7 @@ This project was built for the **MedServicePrice.kz hackathon brief** and is des
 
 ## Live product snapshot
 
-The deployed product already exposes a much richer surface than a basic landing page. In the current UI you can use search, popular query shortcuts, filters, sorting, saved presets, export actions, price-history views, map-oriented discovery, and admin/navigation entry points. citeturn573226view0turn445339view1
+The deployed product already exposes a much richer surface than a basic landing page. In the current UI you can use search, popular query shortcuts, filters, sorting, saved presets, export actions, price-history views, map-oriented discovery, and admin/navigation entry points.
 
 ---
 
@@ -105,7 +105,7 @@ The hackathon brief expects the project to store structured entities such as cli
 
 ## Technology stack
 
-The repository is a **Next.js + TypeScript** project with Prisma, Bun scripts, and a modern UI stack. The dependency set includes React 19, TanStack Query/Table, Leaflet / React Leaflet, Framer Motion, cmdk, Recharts, NextAuth, next-intl, Zod, Zustand, and Tailwind-compatible styling utilities. The repository also contains `app/`, `src/`, `db/`, `prisma/`, and `public/` directories, plus scripts for development, build, start, linting, and Prisma database operations. citeturn650618view0turn445339view0
+The repository is a **Next.js + TypeScript** project with Prisma, Bun scripts, and a modern UI stack. The dependency set includes React 19, TanStack Query/Table, Leaflet / React Leaflet, Framer Motion, cmdk, Recharts, NextAuth, next-intl, Zod, Zustand, and Tailwind-compatible styling utilities. The repository also contains `app/`, `src/`, `db/`, `prisma/`, and `public/` directories, plus scripts for development, build, start, linting, and Prisma database operations.
 
 ### Core stack
 - **Frontend:** Next.js, React, TypeScript
@@ -197,7 +197,7 @@ bun run db:reset    # Reset the local database
 
 MedServicePrice.kz is designed for **open, public, non-authenticated** clinic data only.
 
-The project brief calls for support for common open formats such as HTML, PDF, DOCX, and Excel, with source-by-source resilience, deduplication, logging, raw-data retention, and daily freshness expectations. It also emphasizes transparent source attribution and a service catalog that can normalize equivalent service names such as local abbreviations, full Russian names, and English variants into a single canonical service. citeturn0file0
+The project brief calls for support for common open formats such as HTML, PDF, DOCX, and Excel, with source-by-source resilience, deduplication, logging, raw-data retention, and daily freshness expectations. It also emphasizes transparent source attribution and a service catalog that can normalize equivalent service names such as local abbreviations, full Russian names, and English variants into a single canonical service.
 
 ### Important usage note
 Prices shown on the platform are indicative and sourced from public clinic information. Users should always confirm the final cost, availability, and appointment details directly with the clinic before visiting.
