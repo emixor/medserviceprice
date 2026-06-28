@@ -248,3 +248,93 @@ model PriceVoucher {
   @@index([confirmationId])
   @@map("price_vouchers")
 }
+
+/// Scraper Source Configuration — the "routing table" for the background
+/// scraping pipeline. Each row represents one addressable scrape target
+/// (a specific clinic+city+URL triple) and tracks:
+///   - the active routing switch (`isActive`) — operators can disable a
+///     misbehaving source without redeploying code;
+///   - the parser module to invoke (`parserType`) — selects which registered
+///     scraper implementation handles this source (registry pattern, see
+///     src/lib/scraper/registry.ts);
+///   - the last attempted + last successful parse timestamps, used by the
+///     admin "Source Health" dashboard and by the scheduler to decide what
+///     to refresh next;
+///   - error telemetry (`lastErrorMessage`, `lastErrorAt`, `consecutiveFailures`)
+///     surfaced live to the frontend;
+///   - aggregate run counters for success-rate calculations.
+///
+/// The table is seeded idempotently from `CLINIC_SOURCES` (see
+/// src/lib/scraper/config.ts → `ensureScraperSourceConfigs`) on first worker
+/// run; operators may subsequently toggle/extend rows via the API without
+/// touching code. New external scrapers can be added by inserting a row with
+/// a new `parserType` and registering a matching scraper implementation.
+model ScraperSourceConfig {
+  id                  String   @id @default(cuid())
+  // Composite natural key — one config row per (sourceName, city, sourceUrl).
+  sourceName          String   @map("source_name")    // KDL | Invitro | Olymp | ...
+  clinicName          String   @map("clinic_name")
+  city                String
+  sourceUrl           String   @map("source_url")
+  website             String?
+  // Routing switch — when false, the background worker skips this source.
+  isActive            Boolean  @default(true) @map("is_active")
+  // Selects the scraper implementation from the registry (default "simulated").
+  parserType          String   @default("simulated") @map("parser_type")
+  // Per-source parser config (JSON): CSS selectors, headers, auth, etc.
+  parserConfig        String?  @map("parser_config")
+  // Per-source execution timeout in ms (default 15000 = 15s). The worker
+  // enforces this via Promise.race + AbortController.
+  timeoutMs           Int      @default(15000) @map("timeout_ms")
+  // Politeness delay between requests to this source (ms).
+  politenessMs        Int      @default(200) @map("politeness_ms")
+  // Live telemetry — updated by the worker after every attempt.
+  lastAttemptedAt     DateTime? @map("last_attempted_at")
+  lastSuccessfulAt    DateTime? @map("last_successful_at")
+  lastErrorMessage    String?  @map("last_error_message")
+  lastErrorAt         DateTime? @map("last_error_at")
+  consecutiveFailures Int      @default(0) @map("consecutive_failures")
+  totalRuns           Int      @default(0) @map("total_runs")
+  totalSuccess        Int      @default(0) @map("total_success")
+  totalFailed         Int      @default(0) @map("total_failed")
+  totalRowsParsed     Int      @default(0) @map("total_rows_parsed")
+  totalRowsUpserted   Int      @default(0) @map("total_rows_upserted")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@unique([sourceName, city, sourceUrl])
+  @@index([isActive])
+  @@index([city])
+  @@index([sourceName])
+  @@map("scraper_source_configs")
+}
+
+/// Background Ingestion Jobs — one row per enqueued background scrape run.
+/// The worker creates a row when a job is enqueued (status="queued"),
+/// transitions to "running" when it picks up the job, and to "success" /
+/// "partial" / "failed" when complete. The frontend polls
+/// GET /api/v1/ingest/status to render live progress without blocking.
+model IngestionJob {
+  id           String   @id @default(cuid())
+  jobId        String   @unique @map("job_id") // short, opaque, e.g. "job_a1b2c3"
+  status       String   @default("queued") // queued | running | success | partial | failed | cancelled
+  triggeredBy  String   @default("manual") @map("triggered_by") // manual | schedule | api
+  sourcesTotal Int      @default(0) @map("sources_total")
+  sourcesDone  Int      @default(0) @map("sources_done")
+  sourcesFailed Int     @default(0) @map("sources_failed")
+  rowsFetched  Int      @default(0) @map("rows_fetched")
+  rowsNormalized Int    @default(0) @map("rows_normalized")
+  rowsUnmatched Int     @default(0) @map("rows_unmatched")
+  errorMessage String?  @map("error_message")
+  // JSON array of per-source results, appended as each source completes.
+  sourcesJson  String?  @map("sources_json")
+  queuedAt     DateTime @default(now()) @map("queued_at")
+  startedAt    DateTime? @map("started_at")
+  finishedAt   DateTime? @map("finished_at")
+  durationMs   Int?     @map("duration_ms")
+
+  @@index([status])
+  @@index([queuedAt])
+  @@index([triggeredBy])
+  @@map("ingestion_jobs")
+}

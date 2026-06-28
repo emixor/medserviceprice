@@ -1,0 +1,920 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Light theme — medical teal */
+:root {
+  --radius: 0.7rem;
+  --background: oklch(0.99 0.004 180);
+  --foreground: oklch(0.18 0.02 200);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 200);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 200);
+  --primary: oklch(0.52 0.11 180); /* teal-600 */
+  --primary-foreground: oklch(0.99 0.005 180);
+  --secondary: oklch(0.96 0.012 180);
+  --secondary-foreground: oklch(0.3 0.04 180);
+  --muted: oklch(0.96 0.008 180);
+  --muted-foreground: oklch(0.5 0.02 200);
+  --accent: oklch(0.94 0.03 180);
+  --accent-foreground: oklch(0.3 0.06 180);
+  --destructive: oklch(0.58 0.22 25);
+  --border: oklch(0.9 0.01 180);
+  --input: oklch(0.92 0.01 180);
+  --ring: oklch(0.52 0.11 180);
+  /* Unified premium chart palette — emerald/teal/amber/rose/violet/cyan.
+     Shared by all recharts charts across views so colors stay cohesive. */
+  --chart-1: #10b981; /* emerald-500 */
+  --chart-2: #14b8a6; /* teal-500 */
+  --chart-3: #f59e0b; /* amber-500 */
+  --chart-4: #f43f5e; /* rose-500 */
+  --chart-5: #8b5cf6; /* violet-500 */
+  --chart-6: #06b6d4; /* cyan-500 */
+  --sidebar: oklch(0.985 0.005 180);
+  --sidebar-foreground: oklch(0.18 0.02 200);
+  --sidebar-primary: oklch(0.52 0.11 180);
+  --sidebar-primary-foreground: oklch(0.99 0.005 180);
+  --sidebar-accent: oklch(0.94 0.03 180);
+  --sidebar-accent-foreground: oklch(0.3 0.06 180);
+  --sidebar-border: oklch(0.9 0.01 180);
+  --sidebar-ring: oklch(0.52 0.11 180);
+}
+
+/* Dark theme */
+.dark {
+  --background: oklch(0.16 0.015 200);
+  --foreground: oklch(0.97 0.005 180);
+  --card: oklch(0.21 0.02 200);
+  --card-foreground: oklch(0.97 0.005 180);
+  --popover: oklch(0.21 0.02 200);
+  --popover-foreground: oklch(0.97 0.005 180);
+  --primary: oklch(0.7 0.12 180);
+  --primary-foreground: oklch(0.16 0.02 200);
+  --secondary: oklch(0.27 0.02 200);
+  --secondary-foreground: oklch(0.97 0.005 180);
+  --muted: oklch(0.25 0.015 200);
+  --muted-foreground: oklch(0.7 0.02 180);
+  --accent: oklch(0.3 0.03 180);
+  --accent-foreground: oklch(0.95 0.02 180);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.6 0.1 180);
+  /* Unified premium chart palette (dark variant — one step brighter). */
+  --chart-1: #34d399; /* emerald-400 */
+  --chart-2: #2dd4bf; /* teal-400 */
+  --chart-3: #fbbf24; /* amber-400 */
+  --chart-4: #fb7185; /* rose-400 */
+  --chart-5: #a78bfa; /* violet-400 */
+  --chart-6: #22d3ee; /* cyan-400 */
+  --sidebar: oklch(0.21 0.02 200);
+  --sidebar-foreground: oklch(0.97 0.005 180);
+  --sidebar-primary: oklch(0.7 0.12 180);
+  --sidebar-primary-foreground: oklch(0.16 0.02 200);
+  --sidebar-accent: oklch(0.3 0.03 180);
+  --sidebar-accent-foreground: oklch(0.95 0.02 180);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.6 0.1 180);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Premium focus-visible rings — visible, consistent, accessible. */
+  *:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px color-mix(in oklch, var(--ring) 70%, transparent);
+    border-radius: 6px;
+  }
+}
+
+/* ---------- Premium global scrollbar (webkit + firefox) ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 30%, transparent);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.18s ease;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklch, var(--primary) 55%, transparent);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- Custom scrollbar (long lists) ---------- */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ring) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--ring) 55%, transparent);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ring);
+  }
+  .scrollbar-thin::-webkit-scrollbar:horizontal {
+    height: 8px;
+  }
+
+  /* Premium slim scrollbar — for the Data Quality panel's anomaly list and
+     breakdown lists. Emerald-tinted thumb on a transparent track, with a
+     smooth color shift on hover. */
+  .dq-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--primary) 35%, transparent) transparent;
+  }
+  .dq-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .dq-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .dq-scroll::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--primary) 35%, transparent);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+    transition: background-color 0.18s ease;
+  }
+  .dq-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  }
+
+  /* Hero gradient backgrounds (teal medical) */
+  .hero-gradient {
+    background:
+      radial-gradient(1200px 500px at 15% -10%, color-mix(in oklch, var(--primary) 22%, transparent), transparent 60%),
+      radial-gradient(900px 400px at 95% 0%, color-mix(in oklch, var(--chart-2) 18%, transparent), transparent 55%),
+      linear-gradient(180deg, color-mix(in oklch, var(--accent) 40%, var(--background)) 0%, var(--background) 100%);
+  }
+  .grid-pattern {
+    background-image:
+      linear-gradient(color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 50%, transparent 100%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 50%, transparent 100%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Glass-morphism utility — frosted card with blurred backdrop. */
+  .glass {
+    background: color-mix(in oklch, var(--card) 70%, transparent);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
+  }
+}
+
+/* ---------- Leaflet tweaks to match theme ---------- */
+.leaflet-container {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--muted);
+  border-radius: var(--radius-lg);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
+}
+.leaflet-popup-content {
+  margin: 0.75rem 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.leaflet-bar a {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.leaflet-bar a:hover {
+  background: var(--accent);
+}
+
+/* Animated price marker pulse */
+@keyframes msp-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 60%, transparent); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.msp-marker-pulse {
+  animation: msp-pulse 2.2s infinite;
+}
+
+/* Fade-in helper for view transitions */
+@keyframes msp-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msp-fade-in {
+  animation: msp-fade-in 0.25s ease-out;
+}
+
+/* Staggered card entrance */
+@keyframes msp-card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msp-card-in {
+  animation: msp-card-in 0.3s ease-out both;
+}
+
+/* Shimmer for skeletons */
+@keyframes msp-shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.msp-shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--muted) 60%, transparent) 0%,
+    color-mix(in oklch, var(--muted) 90%, transparent) 50%,
+    color-mix(in oklch, var(--muted) 60%, transparent) 100%
+  );
+  background-size: 2000px 100%;
+  animation: msp-shimmer 2s infinite linear;
+}
+
+/* Smooth price badge pop */
+@keyframes msp-pop {
+  0% { transform: scale(0.96); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.msp-pop {
+  animation: msp-pop 0.35s ease-out;
+}
+
+/* Result card hover lift */
+.msp-card-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.msp-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -10px rgb(0 0 0 / 0.18);
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+}
+
+/* Best-price cell glow in compare table */
+.msp-best-cell {
+  position: relative;
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+.msp-best-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent);
+  pointer-events: none;
+}
+
+/* Stat counter subtle gradient text */
+.msp-gradient-text {
+  background: linear-gradient(135deg, var(--primary), color-mix(in oklch, var(--primary) 60%, var(--chart-2)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Emerald gradient text — for winner / best-overall emphasis. */
+.msp-gradient-emerald {
+  background: linear-gradient(135deg, oklch(0.55 0.16 145), oklch(0.65 0.15 160));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Best-price card highlight (Lowest in city ribbon) */
+.msp-best-card {
+  background:
+    linear-gradient(135deg,
+      color-mix(in oklch, var(--primary) 5%, var(--card)) 0%,
+      var(--card) 40%
+    );
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  animation: msp-best-glow 3s ease-in-out infinite;
+}
+.msp-best-card:hover {
+  background:
+    linear-gradient(135deg,
+      color-mix(in oklch, var(--primary) 8%, var(--card)) 0%,
+      var(--card) 50%
+    );
+}
+
+/* Subtle animated glow for the best-price card (pulsing border + shadow). */
+@keyframes msp-best-glow {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 30%, transparent), 0 4px 12px -4px color-mix(in oklch, var(--primary) 20%, transparent); }
+  50% { box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 50%, transparent), 0 8px 20px -4px color-mix(in oklch, var(--primary) 35%, transparent); }
+}
+
+/* Animated nav-pill indicator for view tabs */
+@keyframes msp-pill-in {
+  from { opacity: 0; transform: scaleX(0.6); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+.msp-pill-in {
+  animation: msp-pill-in 0.25s ease-out;
+}
+
+/* Subtle entrance animation for modals/dialogs */
+@keyframes msp-dialog-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.msp-dialog-in {
+  animation: msp-dialog-in 0.2s ease-out;
+}
+
+/* Bell-ring animation for the notification bell when new alerts exist */
+@keyframes msp-bell-ring {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(4deg); }
+}
+
+/* Animated gradient border for hero search */
+@keyframes msp-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 30%, transparent), 0 8px 24px -12px color-mix(in oklch, var(--primary) 30%, transparent); }
+  50% { box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 50%, transparent), 0 12px 32px -10px color-mix(in oklch, var(--primary) 45%, transparent); }
+}
+.msp-hero-search {
+  animation: msp-glow-pulse 4s ease-in-out infinite;
+}
+
+/* Quick-link chip */
+.msp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  background: color-mix(in oklch, var(--card) 80%, transparent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(8px);
+}
+.msp-chip:hover {
+  border-color: color-mix(in oklch, var(--primary) 50%, transparent);
+  background: color-mix(in oklch, var(--primary) 8%, var(--card));
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Recently-viewed pill */
+.msp-recent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 0.75rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  max-width: 100%;
+}
+.msp-recent-pill:hover {
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  background: color-mix(in oklch, var(--primary) 5%, var(--card));
+}
+.msp-recent-pill > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Trend up/down indicator */
+.msp-trend-up { color: oklch(0.55 0.18 25); }
+.msp-trend-down { color: oklch(0.55 0.16 145); }
+.msp-trend-stable { color: var(--muted-foreground); }
+
+/* Map marker tier colors */
+.msp-marker-cheap {
+  background: oklch(0.65 0.16 145);
+  border: 2px solid white;
+}
+.msp-marker-mid {
+  background: oklch(0.7 0.14 70);
+  border: 2px solid white;
+}
+.msp-marker-premium {
+  background: oklch(0.55 0.18 25);
+  border: 2px solid white;
+}
+
+/* Mobile-horizontal-scroll hint */
+.msp-scroll-hint {
+  background:
+    linear-gradient(90deg, var(--background) 0%, transparent 8%, transparent 92%, var(--background) 100%);
+  pointer-events: none;
+}
+
+/* Focus ring polish (legacy fallback — also covered by @layer base). */
+*:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--primary) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- Premium card utility — layered shadow + subtle colored glow ---------- */
+.card-premium {
+  position: relative;
+  background: var(--card);
+  border: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 2px -1px rgb(0 0 0 / 0.06),
+    0 4px 12px -4px rgb(0 0 0 / 0.04),
+    0 8px 20px -8px color-mix(in oklch, var(--primary) 12%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-premium:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  box-shadow:
+    0 2px 4px -2px rgb(0 0 0 / 0.08),
+    0 12px 28px -8px color-mix(in oklch, var(--primary) 22%, transparent),
+    0 6px 14px -4px rgb(0 0 0 / 0.1);
+}
+.dark .card-premium {
+  box-shadow:
+    0 1px 2px -1px rgb(0 0 0 / 0.2),
+    0 4px 12px -4px rgb(0 0 0 / 0.15),
+    0 8px 20px -8px color-mix(in oklch, var(--primary) 8%, transparent);
+}
+.dark .card-premium:hover {
+  box-shadow:
+    0 2px 4px -2px rgb(0 0 0 / 0.3),
+    0 12px 28px -8px color-mix(in oklch, var(--primary) 18%, transparent),
+    0 6px 14px -4px rgb(0 0 0 / 0.2);
+}
+
+/* ---------- Gradient text — for hero headings/numbers ---------- */
+.gradient-text {
+  background: linear-gradient(135deg, #059669 0%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.dark .gradient-text {
+  background: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- Shimmer keyframe (skeleton sweep) ---------- */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--muted) 60%, transparent) 0%,
+    color-mix(in oklch, var(--muted) 90%, transparent) 50%,
+    color-mix(in oklch, var(--muted) 60%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+/* ---------- Section divider — subtle gradient line ---------- */
+.section-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    color-mix(in oklch, var(--border) 80%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+/* ---------- Subtle noise/grain texture overlay (for premium hero backgrounds) ---------- */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-repeat: repeat;
+  z-index: 0;
+}
+
+/* ---------- Premium gradient top-border that appears on hover (for result cards) ---------- */
+.card-hover-border {
+  position: relative;
+}
+.card-hover-border::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(to right, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+.card-hover-border:hover::before {
+  opacity: 1;
+}
+.dark .card-hover-border::before {
+  background: linear-gradient(to right, #34d399 0%, #2dd4bf 50%, #22d3ee 100%);
+}
+
+/* ---------- Best-price celebration sparkle (pulses) ---------- */
+@keyframes msp-sparkle-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.msp-sparkle {
+  animation: msp-sparkle-pulse 2s ease-in-out infinite;
+}
+
+/* ---------- Subtle shimmer sweep (for best-price cards) ---------- */
+@keyframes msp-shimmer-sweep {
+  0% { transform: translateX(-100%) skewX(-12deg); opacity: 0; }
+  35% { opacity: 0.55; }
+  100% { transform: translateX(200%) skewX(-12deg); opacity: 0; }
+}
+.msp-shimmer-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.msp-shimmer-sweep::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--primary) 25%, transparent),
+    transparent
+  );
+  animation: msp-shimmer-sweep 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* ---------- Verified check (for rating ≥ 4.5) ---------- */
+.msp-verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #10b981, #14b8a6);
+  color: white;
+  box-shadow: 0 0 0 1px color-mix(in oklch, #10b981 40%, transparent), 0 2px 6px -1px color-mix(in oklch, #10b981 50%, transparent);
+}
+.dark .msp-verified {
+  background: linear-gradient(135deg, #34d399, #2dd4bf);
+  box-shadow: 0 0 0 1px color-mix(in oklch, #34d399 40%, transparent), 0 2px 6px -1px color-mix(in oklch, #34d399 50%, transparent);
+}
+
+/* ---------- Pill-style segmented control (for time range selectors) ---------- */
+.msp-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in oklch, var(--muted) 60%, transparent);
+  border: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+  border-radius: 9999px;
+}
+.msp-pill-btn {
+  position: relative;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border-radius: 9999px;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.msp-pill-btn:hover {
+  color: var(--foreground);
+}
+.msp-pill-btn[data-active="true"] {
+  color: var(--foreground);
+  background: var(--background);
+  box-shadow:
+    0 1px 2px -1px rgb(0 0 0 / 0.08),
+    0 4px 10px -4px color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* ---------- Status dot pulse (for "all systems operational") ---------- */
+@keyframes msp-status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, #10b981 60%, transparent); }
+  50% { box-shadow: 0 0 0 4px transparent; }
+}
+.msp-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #10b981;
+  animation: msp-status-pulse 2s ease-in-out infinite;
+}
+.dark .msp-status-dot {
+  background: #34d399;
+}
+
+/* ---------- Price-tier gradient legend bar (for map view) ---------- */
+.msp-tier-gradient {
+  background: linear-gradient(
+    to right,
+    #16a34a 0%,
+    #f59e0b 50%,
+    #dc2626 100%
+  );
+}
+.dark .msp-tier-gradient {
+  background: linear-gradient(
+    to right,
+    #4ade80 0%,
+    #fbbf24 50%,
+    #f87171 100%
+  );
+}
+
+/* Better price typography */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* iOS safe-area bottom padding */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Clinic avatar — deterministic pastel badge generated from the clinic name.
+   The component sets `--ca-hue` inline (0–359); we pick light-mode bg/fg here
+   and override them for dark mode so the same hue stays readable in both. */
+.clinic-avatar {
+  --ca-bg: hsl(var(--ca-hue) 65% 94%);
+  --ca-fg: hsl(var(--ca-hue) 65% 38%);
+  background-color: var(--ca-bg);
+  color: var(--ca-fg);
+  border: 1px solid hsl(var(--ca-hue) 40% 80% / 0.5);
+}
+.dark .clinic-avatar {
+  --ca-bg: hsl(var(--ca-hue) 50% 22%);
+  --ca-fg: hsl(var(--ca-hue) 65% 72%);
+  border-color: hsl(var(--ca-hue) 40% 50% / 0.35);
+}
+
+/* ---------- Hero section mesh gradient (emerald/teal/cyan tones) ---------- */
+.hero-mesh-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16,185,129,0.16), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(20,184,166,0.10), transparent),
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(6,182,212,0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 100%, rgba(16,185,129,0.05), transparent);
+}
+.dark .hero-mesh-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16,185,129,0.22), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(20,184,166,0.16), transparent),
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(6,182,212,0.12), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 100%, rgba(16,185,129,0.08), transparent);
+}
+
+/* ---------- Stat number glow ---------- */
+.stat-glow {
+  text-shadow: 0 0 20px rgba(16,185,129,0.3);
+}
+.dark .stat-glow {
+  text-shadow: 0 0 30px rgba(52,211,153,0.4);
+}
+
+/* ---------- Price hero — large price display on result cards ---------- */
+.price-hero {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+@media (min-width: 640px) {
+  .price-hero {
+    font-size: 2rem;
+  }
+}
+
+/* ---------- Best-value left border accent ---------- */
+.best-value-border {
+  border-left: 4px solid;
+  border-image: linear-gradient(to bottom, #10b981, #14b8a6) 1;
+}
+
+/* ---------- Count-up animation ---------- */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.count-up {
+  animation: countUp 0.6s ease-out forwards;
+}
+
+/* ---------- Slide-up nav entrance ---------- */
+@keyframes slideUpNav {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.slide-up-nav {
+  animation: slideUpNav 0.4s ease-out forwards;
+}
+
+/* ---------- Search bar focus glow ---------- */
+.search-glow:focus-within {
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.15), 0 0 20px rgba(16,185,129,0.1);
+}
+.dark .search-glow:focus-within {
+  box-shadow: 0 0 0 3px rgba(52,211,153,0.2), 0 0 24px rgba(52,211,153,0.15);
+}
+
+/* ---------- Premium search tag pills ---------- */
+.search-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklch, var(--primary) 8%, var(--card)), color-mix(in oklch, var(--chart-2) 6%, var(--card)));
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+.search-tag-pill:hover {
+  border-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklch, var(--primary) 14%, var(--card)), color-mix(in oklch, var(--chart-2) 10%, var(--card)));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -4px color-mix(in oklch, var(--primary) 25%, transparent);
+}
+.search-tag-pill[data-active="true"] {
+  border-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklch, var(--primary) 16%, var(--card)), color-mix(in oklch, var(--chart-2) 12%, var(--card)));
+  color: var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 30%, transparent), 0 4px 12px -4px color-mix(in oklch, var(--primary) 30%, transparent);
+}
+
+/* ---------- Sparkline glow effect ---------- */
+.sparkline-glow {
+  filter: drop-shadow(0 0 3px rgba(16,185,129,0.35));
+}
+.dark .sparkline-glow {
+  filter: drop-shadow(0 0 4px rgba(52,211,153,0.4));
+}
+
+/* ---------- Price range bar thicker ---------- */
+.price-range-bar {
+  height: 0.5rem;
+}
+
+/* ---------- Emerald glow shadow for prices ---------- */
+.price-glow {
+  text-shadow: 0 0 18px rgba(16,185,129,0.25);
+}
+.dark .price-glow {
+  text-shadow: 0 0 24px rgba(52,211,153,0.35);
+}
+
+/* ---------- Best-value card tint ---------- */
+.best-value-tint {
+  background: linear-gradient(135deg, rgba(16,185,129,0.05) 0%, transparent 50%);
+}
+.dark .best-value-tint {
+  background: linear-gradient(135deg, rgba(52,211,153,0.08) 0%, transparent 50%);
+}
+
+/* ---------- Trust band background ---------- */
+.trust-band-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--primary) 4%, transparent) 50%, transparent 100%);
+}
+.dark .trust-band-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--primary) 6%, transparent) 50%, transparent 100%);
+}
+
+/* ---------- Empty state decorative ---------- */
+.empty-state-glow {
+  background: radial-gradient(circle at center, color-mix(in oklch, var(--primary) 15%, transparent), transparent 70%);
+}
+
+/* ---------- Quick filter chip rail ---------- */
+.quick-chips-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.quick-chips-scroll::-webkit-scrollbar {
+  display: none;
+}
