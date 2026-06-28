@@ -62,6 +62,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { DataQualityPanel } from "@/components/data-quality-panel";
 import { ParserRunsPanel } from "@/components/parser-runs-panel";
+import { BackgroundScraperPanel } from "@/components/background-scraper-panel";
 
 export function AdminView() {
   const { t, lang } = useI18n();
@@ -606,6 +607,11 @@ export function AdminView() {
       <div className="section-divider mb-5" />
 
       <DataQualityPanel />
+
+      {/* Section divider before Background Scraper panel */}
+      <div className="section-divider mb-5" />
+
+      <BackgroundScraperPanel />
 
       {/* Section divider before unmatched queue */}
       <div className="section-divider mb-5" />
