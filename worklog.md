@@ -4249,3 +4249,27 @@ Stage Summary:
 - README.md at project root (633 lines, ready for GitHub).
 - PITCH.md at project root (210 lines, presentation-ready).
 - All numbers consistent across deliverables and with live /api/v1/stats.
+
+---
+Task ID: PITCH-2
+Agent: main (Z.ai Code)
+Task: Split the single bilingual pitch-deck.html into two separate single-language decks (English-only and Russian-only).
+
+Work Log:
+- Read existing public/pitch-deck.html to extract structure and bilingual content.
+- Created public/pitch-deck-en.html — fully English 7-slide deck. Removed all inline RU text and the parallel-column .bi CSS class (no longer needed). Single-language layout uses full slide width with larger typography (h1 7vw, h2 4.5vw, padding 8vw) for better readability. Added lang-switch nav (EN active / RU link). All 7 slides fully translated to English-only: Vision, The Pain, Architecture, Normalization, Traction, Killer Features, Roadmap.
+- Created public/pitch-deck-ru.html — fully Russian 7-slide deck. Same enhanced layout. lang="ru". All chrome labels, eyebrows, slide titles, pain cards, architecture steps, normalization labels, metric descriptions, feature cards, roadmap items localized to Russian. lang-switch nav (RU active / EN link).
+- Removed old public/pitch-deck.html (the bilingual one).
+- Verified via agent-browser:
+  * EN deck: HTTP 200, slide 1 renders "Bringing price transparency..." + LIVE DATA LAYER card with all 7 metrics; navigated to slide 4 — full English normalization flow visible ("INTELLIGENT NORMALIZATION PIPELINE", "Raw input", "Service Directory", "Complete Blood Count", confidence rings).
+  * RU deck: HTTP 200, slide 1 renders "Прозрачность цен..." + LIVE СЛОЙ ДАННЫХ card; navigated to slide 6 — fully Russian killer-features ("КИЛЛЕР-ФИЧИ · «WOW-ФАКТОР»", "ФИЧА 01", "оптимизатор корзины анализов", all 3 feature descriptions in Russian, Cyrillic bullets).
+  * Cross-link verified: clicked "EN" link from RU deck → navigated to English deck successfully.
+  * Old /pitch-deck.html returns HTTP 404 (correctly removed).
+
+Stage Summary:
+- Two standalone single-language pitch decks now exist:
+  * /pitch-deck-en.html — English only, 40 KB
+  * /pitch-deck-ru.html — Russian only, 45 KB
+- Both share the same dark emerald/amber design system, keyboard nav, touch swipe, fullscreen (F), print (P), progress bar, and a bottom language-switcher to flip between them.
+- Bilingual parallel-column layout replaced with spacious single-column layouts — larger text, better for live presentation.
+- README.md and PITCH.md from prior task remain unchanged (already bilingual, which is appropriate for those document formats).
